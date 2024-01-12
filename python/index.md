@@ -50,25 +50,24 @@
 ### [Chapter 08. Class](chapter_08/index.md)
 - 08-1. 이름 공간(namespace)에 대한 소개
 - 08-2. 클래스의 기본 구조
-- 08-3. 클래스(class)와 객체(object)
-- 08-4. self의 의미
+- 08-3. 생성자(Constructor)와 소멸자(Destructor)
+- 08-4. 클래스(class)와 객체(object)
+- 08-5. self의 의미
 - 문제 풀이
 
-### Chapter 09. 클래스의 완성
-- 09-1. 정보은닉 (Information Hiding)
-- 09-2. 캡슐화 (Encapsulation)
-- 09-3. 생성자(Constructor)와 소멸자(Destructor)
+### Chapter 09. 보다 견고한 클래스
+- 09-1. 비공개 속성 (_, __)
+- 09-2. 정보은닉(Information Hiding) & 캡슐화(Encapsulation)
 - 문제 풀이
 
 ### Chapter 10. 상속(Inheritance)과 다형성(Polymorphism)
-- 10-1. 비공개 속성 (_, __)
-- 10-2. 정적 메서드 (staticmethod)
-- 10-3. 클래스 메서드 (classmethod)
-- 10-4. 상속(is) 혹은 포함(has) 관계
-- 10-5. 메서드 오버라이드(override)
-- 10-6. 추상 클래스
-- 10-7. 다중 상속
-- 10-8. 죽음의 다이아몬드 (the Deadly Diamond of Death: DDD) 란?
+- 10-1. 정적 메서드 (staticmethod)
+- 10-2. 클래스 메서드 (classmethod)
+- 10-3. 상속(is) 혹은 포함(has) 관계
+- 10-4. 메서드 오버라이드(override)
+- 10-5. 추상 클래스
+- 10-6. 다중 상속
+- 10-7. 죽음의 다이아몬드 (the Deadly Diamond of Death: DDD) 란?
 - 문제 풀이
 
 ### Chapter 11. 이터레이터(iterator)
