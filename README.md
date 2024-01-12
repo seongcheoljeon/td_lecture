@@ -48,7 +48,7 @@
 - 07-4. 예외 처리 (try~except)
 - 문제 풀이
 
-### Chapter 08. Class
+### [Chapter 08. Class](./chapter_08/index.md)
 - 08-1. 이름 공간(namespace)에 대한 소개
 - 08-2. 클래스의 기본 구조
 - 08-3. 클래스(class)와 객체(object)
