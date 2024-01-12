@@ -55,7 +55,7 @@
 - 08-5. self의 의미
 - 문제 풀이
 
-### Chapter 09. 보다 견고한 클래스
+### [Chapter 09. 보다 견고한 클래스](chapter_09/index.md)
 - 09-1. 비공개 속성 (_, __)
 - 09-2. 정보은닉(Information Hiding) & 캡슐화(Encapsulation)
 - 문제 풀이
@@ -177,4 +177,3 @@
 ### Chapter 27. 데이터베이스 API
 - 27-1. Python의 데이터베이스 모듈
 - 27-2. Web Server와 Database Server 그리고 Python 연동
-- 
