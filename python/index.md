@@ -178,3 +178,9 @@
 ### Chapter 27. 데이터베이스 API
 - 27-1. Python의 데이터베이스 모듈
 - 27-2. Web Server와 Database Server 그리고 Python 연동
+
+### Chapter 28. Algorithm
+- 28-1. 알고리즘 개요
+- 28-2. 정렬 알고리즘
+- 28-3. 탐색 알고리즘
+- 28-4. 그 밖의 중요한 알고리즘
