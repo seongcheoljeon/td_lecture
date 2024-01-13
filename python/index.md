@@ -114,7 +114,7 @@
 - 16-4. 패키지 사용
 - 문제 풀이
 
-### Chapter 17. GUI 프로그래밍
+### [Chapter 17. GUI 프로그래밍](chapter_17/index.md)
 - 17-1. PySide2 소개 및 설치
 - 17-2. 앱 만들기
 - 17-3. Signal & Slot
@@ -136,7 +136,7 @@
 - 19-2. 아이콘 파일
 - 19-3. Qt 스타일시트(QSS)
 
-### [Chapter 20. 모델 뷰 아키텍처]()
+### [Chapter 20. 모델 뷰 아키텍처](chapter_20/index.md)
 - 20-1. MVC (Model-View-Contoller)
 - 20-2. QListView, QTableView, QTreeView
 - 20-3. Qt 모델에서 SQL 데이터베이스 쿼리
