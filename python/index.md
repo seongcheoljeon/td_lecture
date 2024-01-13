@@ -91,7 +91,7 @@
 - 13-6. aioredis (asyncio 기반의 Redis 라이브러리)
 - 문제 풀이
 
-### Chapter 14. 장식자(Decorator)
+### [Chapter 14. 장식자(Decorator)](chapter_14/index.md)
 - 14-1. 데코레이터 생성
 - 14-2. 매개변수와 반환값이 존재하는 데코레이터
 - 14-3. 클래스 기반의 데코레이터
