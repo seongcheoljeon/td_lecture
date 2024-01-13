@@ -136,10 +136,11 @@
 - 19-2. 아이콘 파일
 - 19-3. Qt 스타일시트(QSS)
 
-### Chapter 20. 모델 뷰 아키텍처
-- 20-1. QListView, QTableView, QTreeView
-- 20-2. Qt 모델에서 SQL 데이터베이스 쿼리
-- 다양한 예제
+### [Chapter 20. 모델 뷰 아키텍처]()
+- 20-1. MVC (Model-View-Contoller)
+- 20-2. QListView, QTableView, QTreeView
+- 20-3. Qt 모델에서 SQL 데이터베이스 쿼리
+- 20-4. ToDo List 제작
 
 ### Chapter 21. 동시 실행
 - 21-1. 스레드 풀 (Qrunnable, QThreadPool, ...)

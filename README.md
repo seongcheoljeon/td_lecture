@@ -7,4 +7,3 @@
 ***
 ## [OpenUSD](openusd/index.md)<center><img src="./images/logo/openusd_logo.png" width="45" height="45"></center>
 
-test
