@@ -146,3 +146,5 @@ def is_multiple(x):
 
 __@functools.wraps는 원래 함수의 정보를 유지시켜준다. 따라서 디버깅할 때 유용하므로 데코레이터를 만들 때는 @functools.wraps를 사용하는 
 것이 좋다.__
+
+[chapter 14 목록으로...](../index.md)
