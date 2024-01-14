@@ -60,7 +60,7 @@
 - 09-2. 정보은닉(Information Hiding) & 캡슐화(Encapsulation)
 - 문제 풀이
 
-### Chapter 10. 상속(Inheritance)과 다형성(Polymorphism)
+### [Chapter 10. 상속(Inheritance)과 다형성(Polymorphism)](chapter_10/index.md)
 - 10-1. 정적 메서드 (staticmethod)
 - 10-2. 클래스 메서드 (classmethod)
 - 10-3. 상속(is) 혹은 포함(has) 관계
@@ -70,13 +70,13 @@
 - 10-7. 죽음의 다이아몬드 (the Deadly Diamond of Death: DDD) 란?
 - 문제 풀이
 
-### Chapter 11. 이터레이터(iterator)
+### [Chapter 11. 이터레이터(iterator)](chapter_11/index.md)
 - 11-1. 반복 가능 객체란
 - 11-2. 이터레이터 생성
 - 11-3. iter, next 함수 활용
 - 문제 풀이
 
-### Chapter 12. 제네레이터(generator)
+### [Chapter 12. 제네레이터(generator)](chapter_12/index.md)
 - 12-1. yield 키워드에 대하여
 - 12-2. 제네레이터 생성
 - 12-3. yield from 키워드로 외부에 데이터 전달
