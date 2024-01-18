@@ -80,6 +80,7 @@
 - 12-1. yield 키워드에 대하여
 - 12-2. 제네레이터 생성
 - 12-3. yield from 키워드로 외부에 데이터 전달
+- 12-4. 유용한 모듈 (itertools)
 - 문제 풀이
 
 ### [Chapter 13. 동시성(concurrency)과 병렬성(parallelism)](chapter_13/index.md)
