@@ -82,7 +82,7 @@
 - 12-3. yield from 키워드로 외부에 데이터 전달
 - 문제 풀이
 
-### Chapter 13. 동시성(concurrency)과 병렬성(parallelism)
+### [Chapter 13. 동시성(concurrency)과 병렬성(parallelism)](chapter_13/index.md)
 - 13-1. 프로세스(process) & 스레드(thread)
 - 13-2. Python GIL(Global Interpreter Lock)
 - 13-3. 코루틴(coroutine)
@@ -100,6 +100,7 @@
 ### Chapter 15. 유용한 모듈
 - 15-1. 정규표현식(re)
 - 15-2. 이진 탐색 트리(bisect)
+- 15-3.
 - 15-3. 이미지(Pillow)
 - 15-4. Json형식(JmesPath)
 - 15-5. heap 자료구조(heapq)
