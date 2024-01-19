@@ -84,8 +84,8 @@
 - 문제 풀이
 
 ### [Chapter 13. 동시성(concurrency)과 병렬성(parallelism)](chapter_13/index.md)
-- 13-1. 프로세스(process) & 스레드(thread)
-- 13-2. Python GIL(Global Interpreter Lock)
+- 13-1. Python GIL(Global Interpreter Lock)
+- 13-2. 프로세스(process) & 스레드(thread)
 - 13-3. 코루틴(coroutine)
 - 13-4. 동시성 관리 구현에 유용한 모듈 (futures, asyncio)
 - 13-5. asyncpg (asyncio 기반의 PostgreSQL 라이브러리)
@@ -101,7 +101,6 @@
 ### Chapter 15. 유용한 모듈
 - 15-1. 정규표현식(re)
 - 15-2. 이진 탐색 트리(bisect)
-- 15-3.
 - 15-3. 이미지(Pillow)
 - 15-4. Json형식(JmesPath)
 - 15-5. heap 자료구조(heapq)
@@ -144,7 +143,8 @@
 - 20-3. Qt 모델에서 SQL 데이터베이스 쿼리
 - 20-4. ToDo List 제작
 
-### Chapter 21. 동시 실행
+### [Chapter 21. 동시 실행](chapter_21/index.md)
+- 21-1. QThread
 - 21-1. 스레드 풀 (Qrunnable, QThreadPool, ...)
 
 ### Chapter 22. PySide 심화
