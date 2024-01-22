@@ -183,7 +183,7 @@
 - 27-1. Python의 데이터베이스 모듈
 - 27-2. Web Server와 Database Server 그리고 Python 연동
 
-### Chapter 28. Algorithm
+### [Chapter 28. Algorithm](chapter_28/index.md)
 - 28-1. 알고리즘 개요
 - 28-2. 빅오(Big-O 표기법)
 - 28-3. 연결 리스트(Linked List)
