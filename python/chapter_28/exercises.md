@@ -86,7 +86,7 @@
         print(n % 10)
         solve(n / 10)
       ```
-  </details>
+    </details>
 
 ---
 
@@ -114,7 +114,7 @@
         else:
             print(f'{n} : 합성수')
       ```
-  </details>
+    </details>
 
 ---
 
@@ -133,7 +133,7 @@
         check_prime(i)
         i += 1
       ```
-  </details>
+    </details>
 
 ---
 
@@ -157,7 +157,7 @@
       def three_nums(N: int) -> list:
         lst = [str(N),]
         while N != 1:
-            if N & 0x01:
+            if N % 2 == 1:
                 N = N * 3 + 1
             else:
                 N = N // 2
@@ -166,4 +166,4 @@
       
       print(' '.join(three_nums(22)))
       ```
-  </details>
+    </details>
