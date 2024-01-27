@@ -247,9 +247,75 @@ print('Database objects DB1:', db2)
 3. 앱이 DB 연산을 요청할 때마다 database 클래스를 생성하지만 내부적으로는 한 개의 객체만 생성된다. 따라서 데이터베이스의 동기화가 보장된다.
     리소스를 적게 사용해 메모리와 CPU 사용량을 최적화할 수 있다.
 
-> 단일 어플리케이션 형태가 아닌 여러 어플리케이션이 같은 DB에 접속하는 상황을 생각해보자.   
-> 이 경우 각 어플리케이션이 DB에 접근하는 싱글턴을 생성하기 때문에 싱글턴 패턴에 적합하지 않다.   
-> DB 동기화가 어렵고 리소스 사용량이 많은 경우다. 싱글턴 패턴보다 연결 풀링(conanection pooling) 기법을 사용하는 것이 더 효율적이다.
+다음은 또 다른 database 싱글턴 디자인 패턴 예제이다.
+
+```python
+import sqlite3
+
+
+class DatabaseManager:
+    _instance = None
+    _database_name = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(DatabaseManager, cls).__new__(cls)
+            cls._instance.connection = None
+        return cls._instance
+
+    @classmethod
+    def connect(cls, database_name):
+        if not cls._instance.connection:
+            cls._instance.connection = sqlite3.connect(database_name)
+            cls._database_name = database_name
+            print(f'[{database_name}] 연결 성공.')
+        else:
+            print(f'[{database_name}] 이미 연결됨.')
+
+    @classmethod
+    def execute_query(cls, query):
+        if cls._instance.connection:
+            cursor = cls._instance.connection.cursor()
+            cursor.execute(query)
+            cls._instance.connection.commit()
+            print('쿼리 실행 성공.')
+        else:
+            print(f'[{cls._database_name}] db 연결 실패')
+
+    @classmethod
+    def select_data(cls, query):
+        if cls._instance.connection:
+            cursor = cls._instance.connection.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return result
+        else:
+            print(f'[{cls._database_name}] db 연결 실패')
+
+    @classmethod
+    def close_connection(cls):
+        if cls._instance.connection:
+            cls._instance.connection.close()
+            cls._instance.connection = None
+            print(f'[{cls._database_name}] 연결 종료.')
+        else:
+            print('활성화된 db가 없음.')
+
+
+db_manager1 = DatabaseManager()
+db_manager1.connect('test.db')
+db_manager1.execute_query('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, email TEXT)')
+
+# 또 다른 인스턴스를 생성해도 같은 연결을 공유
+db_manager2 = DatabaseManager()
+db_manager2.execute_query('INSERT INTO users (username, email) VALUES ("scii", "scii@admin.com")')
+
+res = db_manager1.select_data('SELECT * FROM users')
+print(res)
+
+# 연결 닫기
+db_manager1.close_connection()
+```
 
 ## 싱글턴 패턴의 단점
 
@@ -258,6 +324,10 @@ print('Database objects DB1:', db2)
 + 전역 변수의 값이 실수로 변경된 것을 모르고 애플리케이션에서 사용될 수 있다.
 + 같은 객체에 대해 여러 참조자가 생길 수 있다. 싱글턴은 한 개의 객체만을 만들기 때문에 객체에 대해 여러 개의 참조가 생간다.
 + 전역 변수에 종속적인 모든 클래스 간 상호관계가 복잡해진다. 전역 변수 수정이 의도치 않게 다른 클래스에도 영향을 줄 수 있다.
+
+> 단일 어플리케이션 형태가 아닌 여러 어플리케이션이 같은 DB에 접속하는 상황을 생각해보자.   
+> 이 경우 각 어플리케이션이 DB에 접근하는 싱글턴을 생성하기 때문에 싱글턴 패턴에 적합하지 않다.   
+> DB 동기화가 어렵고 리소스 사용량이 많은 경우다. 싱글턴 패턴보다 연결 풀링(conanection pooling) 기법을 사용하는 것이 더 효율적이다.
 
 ## 정리
 
