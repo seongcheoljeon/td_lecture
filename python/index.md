@@ -196,3 +196,7 @@
 - 28-10. Merge/Heap 정렬 알고리즘
 - 28-11. 이진 검색 알고리즘
 - 문제 풀이
+
+### [Chapter 29. Design Pattern](chapter_29/index.md)
+- 29-1. 디자인 패턴 개요
+- 29-2. Singleton Pattern
