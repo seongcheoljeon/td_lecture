@@ -148,7 +148,8 @@
 
 ### [Chapter 21. 동시 실행](chapter_21/index.md)
 - 21-1. QThread
-- 21-1. 스레드 풀 (Qrunnable, QThreadPool, ...)
+- 21-2. Slot Decorator
+- 21-3. 스레드 풀 (Qrunnable, QThreadPool, ...)
 
 ### Chapter 22. PySide 심화
 - 22-1. 타이머 (인터벌, 싱글샷, 딜레이, ...)
