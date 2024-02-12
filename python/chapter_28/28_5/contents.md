@@ -72,6 +72,108 @@ while not s.is_empty():
     print(s.pop())
 ```
 
+### Stack을 이용한 수식 트리
+```python
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class Stack:
+    def __init__(self):
+        self.top = None
+
+    def push(self, data):
+        if self.top is None:
+            self.top = Node(data)
+        else:
+            node = Node(data)
+            node.next = self.top
+            self.top = node
+
+    def pop(self):
+        if self.top is None:
+            return None
+        node = self.top
+        self.top = self.top.next
+        return node.data
+
+    def peek(self):
+        if self.top is None:
+            return None
+        return self.top.data
+
+    def is_empty(self):
+        return self.top is None
+
+
+class CalculateExp:
+    @staticmethod
+    def precedence(op):
+        if op == '(' or op == ')':
+            return 0
+        elif op == '+' or op == '-':
+            return 1
+        elif op == '*' or op == '/':
+            return 2
+        else:
+            return -1
+
+    @staticmethod
+    def is_operator(term):
+        return term in ('+', '-', '*', '/')
+
+    @staticmethod
+    def has_higher_precedence(op1, op2):
+        return CalculateExp.precedence(op1) >= CalculateExp.precedence(op2)
+
+    @staticmethod
+    def infix_to_postfix(expression: str) -> str:
+        res = ''
+        stack = Stack()
+
+        for exp in expression:
+            if exp.isnumeric():
+                res += exp
+            elif exp == '(':
+                stack.push(exp)
+            elif exp == ')':
+                while stack.peek() != '(':
+                    res += stack.pop()
+                stack.pop()
+            elif CalculateExp.is_operator(exp):
+                if (not stack.is_empty()) and (stack.peek() != '(') and CalculateExp.has_higher_precedence(stack.peek(), exp):
+                    res += stack.pop()
+                stack.push(exp)
+
+        while not stack.is_empty():
+            res += stack.pop()
+
+        return res
+
+    @staticmethod
+    def eval_postfix(expression: str) -> float:
+        stack = Stack()
+
+        for exp in expression:
+            if exp.isnumeric():
+                stack.push(float(exp))
+            elif exp != ' ':
+                n2 = stack.pop()
+                n1 = stack.pop()
+                if exp == '+':
+                    res = n1 + n2
+                elif exp == '-':
+                    res = n1 - n2
+                elif exp == '*':
+                    res = n1 * n2
+                else:
+                    res = n1 / n2
+                stack.push(res)
+        return stack.pop()
+```
+
 to be continue...
 
 
