@@ -1,4 +1,4 @@
-
+import typing
 import logging
 import pathlib
 
@@ -7,10 +7,10 @@ from PySide2 import QtWidgets, QtGui
 
 class QtLibs:
     @staticmethod
-    def file_dialog(default_path: str, parent=None) -> pathlib.Path:
+    def file_dialog(default_path: str, parent=None) -> typing.Union[pathlib.Path, None]:
         """
-        선택한 파일 경로 반환
         :param default_path:
+        :param parent:
         :return:
         """
         dia = QtWidgets.QFileDialog.getOpenFileName(parent=parent, dir=default_path)
@@ -19,10 +19,10 @@ class QtLibs:
         return None
 
     @staticmethod
-    def dir_dialog(default_path: str, parent=None) -> pathlib.Path:
+    def dir_dialog(default_path: str, parent=None) -> typing.Union[pathlib.Path, None]:
         """
-        선택한 디렉토리 경로 반환
         :param default_path:
+        :param parent:
         :return:
         """
         dia = QtWidgets.QFileDialog.getExistingDirectory(parent=parent, dir=default_path)
@@ -41,13 +41,13 @@ class LogHandler(logging.Handler):
         logging.getLogger().setLevel(logging.DEBUG)
         self.__out_stream = out_stream
 
-    def emit(self, record):
+    def emit(self, record) -> None:
         msg = self.format(record)
         self.__out_stream.append(msg)
         self.__out_stream.moveCursor(QtGui.QTextCursor.End)
 
     @staticmethod
-    def log_msg(method=None, msg=''):
+    def log_msg(method=None, msg: str = '') -> None:
         if method is None:
             return
         if method.__name__ == 'info':

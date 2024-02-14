@@ -6,11 +6,13 @@ import pathlib
 class System:
     @staticmethod
     def get_files(parent_dir: pathlib.Path, pattern: typing.List[str]) -> typing.Generator:
-        '''
+        """
         사용자가 지정한 부모 디렉토리로부터 모든 하위 디렉토리를 검색하여
         특정 확장자를 가진 파일들을 반환하는 제네레이터
-        :return: 파일 경로 <generator>
-        '''
+        :param parent_dir:
+        :param pattern:
+        :return:
+        """
         for f in parent_dir.glob('**/*'):
             if not f.is_file():
                 continue
@@ -22,11 +24,13 @@ class System:
 
     @staticmethod
     def get_files_lst(parent_dir: pathlib.Path, pattern: typing.List[str]) -> typing.List[pathlib.Path]:
-        '''
+        """
         사용자가 지정한 부모 디렉토리로부터 모든 하위 디렉토리를 검색하여
         특정 확장자를 가진 파일들을 반환하는 메서드
-        :return: 파일 경로 <list>
-        '''
+        :param parent_dir:
+        :param pattern:
+        :return:
+        """
         lst = list()
         for f in parent_dir.glob('**/*'):
             if not f.is_file():
@@ -40,16 +44,15 @@ class System:
 
     @staticmethod
     def get_files_recursion(dpath: str, pattern: typing.List[str], depth: int = 0) -> typing.Generator:
-        '''
-        :param dpath: 부모 디렉토리
-        :param depth: 깊이 값
-        :return: file path generator
-        '''
+        """
+        :param dpath:
+        :param pattern:
+        :param depth:
+        :return:
+        """
         lst = list()
         file_lst = os.listdir(dpath)
         for f in file_lst:
-            # fullpath => '/home/rapa/workspace/usd/sdr/api.h'
-            # fullpath => '/home/rapa/workspace/usd/sdr/testenv'
             fullpath = os.path.join(dpath, f)
             if os.path.isdir(fullpath):
                 lst += System.get_files_recursion(fullpath, pattern, depth+1)

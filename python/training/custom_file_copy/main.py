@@ -45,7 +45,7 @@ importlib.reload(sys_lib)
 # 0100 -> start
 # 0010 -> stop
 # 0001 -> puase
-# 0000 -> 초기 상태
+# 0010 -> 초기 상태
 
 
 class MessageSig:
