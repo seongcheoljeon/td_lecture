@@ -119,7 +119,7 @@
 - 문제 풀이
 
 ### [Chapter 17. GUI 프로그래밍](chapter_17/index.md)
-- 17-1. PySide2 소개 및 설치
+- 17-1. PySide6 소개 및 설치
 - 17-2. 앱 만들기
 - 17-3. Signal & Slot
 - 17-4. Qwidgets (QLabel, QCheckBox, QComboBox, ...)
