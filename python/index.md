@@ -203,3 +203,5 @@
 ### [Chapter 29. Design Pattern](chapter_29/index.md)
 - 29-1. 디자인 패턴 개요
 - 29-2. Singleton Pattern
+
+### [Training](training/index.md)
