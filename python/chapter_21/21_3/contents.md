@@ -567,9 +567,92 @@ __QRunnable을 시작하면 기본적으로 중지할 수 있는 방법이 없�
 다음 코드는 0.01초마다 증가하는 프로그레스바와 Stop 버튼이 있는 간단한 러너이다. Stop을 클릭하면 워커가 종료되고 프로그레스바를 영구적으로 중지한다.
 
 ```python
+import time
 
+from PySide2 import QtWidgets, QtGui, QtCore
+
+
+class WorkerKilledException(Exception):
+    pass
+
+
+class WorkerSignals(QtCore.QObject):
+    progress = QtCore.Signal(int)
+
+
+class JobRunner(QtCore.QRunnable):
+    signals = WorkerSignals()
+
+    def __init__(self):
+        super().__init__()
+
+        self.is_killed = False
+
+    def run(self):
+        try:
+            for i in range(100):
+                JobRunner.signals.progress.emit(i + 1)
+                time.sleep(0.1)
+
+                if self.is_killed:
+                    raise WorkerKilledException
+        except WorkerKilledException:
+            pass
+
+    def kill(self):
+        self.is_killed = True
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        w = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
+        w.setLayout(hbox)
+
+        btn_stop = QtWidgets.QPushButton('Stop')
+
+        hbox.addWidget(btn_stop)
+
+        self.setCentralWidget(w)
+
+        self.status = self.statusBar()
+        self.progress = QtWidgets.QProgressBar()
+        self.status.addPermanentWidget(self.progress)
+
+        self.threadpool = QtCore.QThreadPool()
+
+        self.runner = JobRunner()
+        self.runner.signals.progress.connect(self.slot_update_progress)
+        self.threadpool.start(self.runner)
+
+        btn_stop.pressed.connect(self.runner.kill)
+
+    def slot_update_progress(self, progress):
+        self.progress.setValue(progress)
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+    mw = MainWindow()
+    mw.show()
+    app.exec_()
 ```
 
+* 러너를 죽여야 하는지 여부를 나타내는 플래그는 `is_kill`이다.
+* 각 루프에서 `is_killed`가 `True`인지 여부를 테스트해 예외를 던진다.
+* 예외를 포착하면 여기서 완료 또는 에러 시그널을 내보낸다.
+* `kill()` 메서드를 구현하여 `worker.kill()`을 호출해 종료할 수 있다.
+
+위의 예에서는 단일 워커만 있다. 그러나 많은 애플리케이션에서는 스레드를 더 많이 사용할 수 있다. *__여러 러너가 실행 중일 때 워커 중지를 
+어떻게 처리해야 할까?__*
+
+중지가 모든 워커를 중지하게 하려면, 위의 코드를 아무것도 바꾸지 않아도 된다. 모든 워커를 동일한 `Stop` 시그널에 연결하고 해당 시그널이 발생하면 
+모든 워커가 중지될 것이다.
+
+개별 워커를 중지할 수 있으려면 각 러너에 대해 UI 어디간에 별도의 버튼을 생성하거나 워커를 추적하고 죽이는 더 나은 인터페이스를 제공하는 관리자를
+구현해야 한다.
 
 
 
