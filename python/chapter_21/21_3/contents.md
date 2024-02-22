@@ -1,6 +1,7 @@
 # 21-3. 스레드 풀 (QRunnable, QThreadPool, ...)
 
-## QThread와 QRunnable의 차이점
+## [QThread](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QThread.html#PySide6.QtCore.PySide6.QtCore.QThread)와 [QRunnable](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QThreadPool.html#more)의 차이점
+
 
 + __사용 목적__
   + QThread
@@ -654,9 +655,409 @@ if __name__ == '__main__':
 개별 워커를 중지할 수 있으려면 각 러너에 대해 UI 어디간에 별도의 버튼을 생성하거나 워커를 추적하고 죽이는 더 나은 인터페이스를 제공하는 관리자를
 구현해야 한다.
 
+### Runner 일시 중지
+
+러너를 일시 중지하는 것은 드문 요구 사항이다. 일반적으로 가능한 한 빨리 진행되기를 원하기때문이다. 그러나 때때로 워커를 '잠자기' 상태로 전환해
+데이터 소스에서 읽기를 일시적으로 중지할 수 있다. 워커를 멈추는 데 사용되는 접근 방식을 약간 수정하면 이 작업을 수행할 수 있다. 
+
+```python
+import time
+
+from PySide2 import QtWidgets, QtGui, QtCore
 
 
+class WorkerKilledException(Exception):
+    pass
 
 
+class WorkerSignals(QtCore.QObject):
+    progress = QtCore.Signal(int)
 
 
+class JobRunner(QtCore.QRunnable):
+    signals = WorkerSignals()
+
+    def __init__(self):
+        super().__init__()
+
+        self.is_killed = False
+        self.is_paused = False
+
+    def run(self):
+        try:
+            for i in range(100):
+                JobRunner.signals.progress.emit(i + 1)
+                time.sleep(0.1)
+
+                while self.is_paused:
+                    time.sleep(0.1)
+
+                if self.is_killed:
+                    raise WorkerKilledException
+        except WorkerKilledException:
+            pass
+
+    def kill(self):
+        if self.is_paused:
+            self.resume()
+        self.is_killed = True
+
+    def pause(self):
+        self.is_paused = True
+
+    def resume(self):
+        self.is_paused = False
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        w = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
+        w.setLayout(hbox)
+
+        btn_stop = QtWidgets.QPushButton('Stop')
+        btn_pause = QtWidgets.QPushButton('Pause')
+        btn_resume = QtWidgets.QPushButton('Resume')
+
+        hbox.addWidget(btn_stop)
+        hbox.addWidget(btn_pause)
+        hbox.addWidget(btn_resume)
+
+        self.setCentralWidget(w)
+
+        self.status = self.statusBar()
+        self.progress = QtWidgets.QProgressBar()
+        self.status.addPermanentWidget(self.progress)
+
+        self.threadpool = QtCore.QThreadPool()
+
+        self.runner = JobRunner()
+        self.runner.signals.progress.connect(self.slot_update_progress)
+        self.threadpool.start(self.runner)
+
+        btn_stop.pressed.connect(self.runner.kill)
+        btn_pause.pressed.connect(self.runner.pause)
+        btn_resume.pressed.connect(self.runner.resume)
+
+    def slot_update_progress(self, progress):
+        self.progress.setValue(progress)
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+    mw = MainWindow()
+    mw.show()
+    app.exec_()
+```
+
+Pause를 클릭하면 워커가 일시 중지된다. 그런 다음 Resume을 클릭하면 워커가 시작된 위치에서 계속된다. Stop을 클릭하면 워커가 이전과 같이
+영구적으로 중지된다.
+
+
+### Thread Manager (스레드 관리자)
+
+사용자에게 러너를 직접 제어할 수 있게 하고자 실행 중인 러너를 추적하고 싶을 수 있다. 그런데 QThreadPool 자체는 현재 실행 중인 러너에 대한 
+액세스를 제공하지 않으므로 워커를 시작하고 제어하는 자체 관리자를 만들어야 한다.
+
+다음의 예는 이미 도입된 다른 워커 기능(진행률, 일시 중지 및 중지 제어)을 모델 뷰와 함께 결합해 개별 프로그레스바를 표시한다. 
+
+#### Worker Manager
+
+워커 관리자 클래스는 스레드 풀, 워커, 진행 상황, 상태 정보를 가진다. QAbstractListModel에서 파생됐으며, 이는 Qt 모델과 유사한 인터페이스도
+제공해 QListView의 모델을 사용해 워커별 프로그레스바와 상태 표시기를 제공함을 의미한다. 상태 추적은 추가된 모든 워커에서 자동으로 연결되는 
+여러 내부 시그널을 통해 처리된다.
+
+```python
+import time
+import uuid
+import random
+
+from PySide2 import QtWidgets, QtGui, QtCore
+
+
+class Status:
+    waiting = 'waiting'
+    running = 'running'
+    error = 'error'
+    complete = 'complete'
+    stopped = 'stopped'
+
+    class Keys:
+        status = 'status'
+        progress = 'progress'
+
+
+class Default:
+    data = {Status.Keys.status: Status.waiting, Status.Keys.progress: 0}
+
+
+class Colors:
+    status = {
+        Status.running: '#329DA8',
+        Status.error: '#A83632',
+        Status.stopped: '#DDDDDD',
+        Status.complete: '#32A848'
+    }
+
+
+class WorkerKilledException(Exception): ...
+
+
+class WorkerSignals(QtCore.QObject):
+    '''
+    워커 스레드에 사용할 시그널 정의
+    '''
+
+    error = QtCore.Signal(str, str)
+    result = QtCore.Signal(str, object)
+
+    finished = QtCore.Signal(str)
+    progress = QtCore.Signal(str, int)
+    status = QtCore.Signal(str, str)
+
+
+class Worker(QtCore.QRunnable):
+    '''
+    워커 스레드
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+        # 워커 스레드가 사용할 시그널
+        self.signals = WorkerSignals()
+
+        # 각 작업의 대한 유니크한 ID 설정
+        self.jobid = uuid.uuid4().hex
+
+        self.args = args
+        self.kwargs = kwargs
+
+        self.signals.status.emit(self.jobid, Status.waiting)
+
+        self.is_killed = False
+
+    def run(self):
+        self.signals.status.emit(self.jobid, Status.running)
+
+        x, y = self.args
+
+        try:
+            value = random.randint(0, 100) * x
+            delay = random.random() / 10
+            result = list()
+
+            for i in range(100):
+                # 명시적으로 divide by zero 에러 발생 시킴
+                value = value / y
+                y -= 1
+
+                result.append(value)
+
+                self.signals.progress.emit(self.jobid, i + 1)
+                time.sleep(delay)
+
+                if self.is_killed:
+                    raise WorkerKilledException
+        except WorkerKilledException:
+            self.signals.status.emit(self.jobid, Status.stopped)
+
+        except Exception as err:
+            print(err)
+            self.signals.error.emit(self.jobid, str(err))
+            self.signals.status.emit(self.jobid, Status.error)
+
+        # 예외가 발생하지 않았다면
+        else:
+            self.signals.result.emit(self.jobid, result)
+            self.signals.status.emit(self.jobid, Status.complete)
+
+        self.signals.finished.emit(self.jobid)
+
+    def kill(self):
+        self.is_killed = True
+
+
+class WorkerManager(QtCore.QAbstractListModel):
+    '''
+    워커 대기열 및 상태를 처리하는 관리자
+    각 워커의 진행 상황을 표시
+    '''
+
+    _workers = dict()
+    _state = dict()
+
+    status = QtCore.Signal(str)
+
+    def __init__(self):
+        super().__init__()
+
+        self.threadpool = QtCore.QThreadPool()
+        self.max_threads = self.threadpool.maxThreadCount()
+        print('maximum thread: {0}'.format(self.max_threads))
+
+        self.status_timer = QtCore.QTimer()
+        self.status_timer.setInterval(100)
+        self.status_timer.timeout.connect(self.notify_status)
+
+    def notify_status(self):
+        n_workers = len(WorkerManager._workers)
+        running = min(n_workers, self.max_threads)
+        waiting = max(0, n_workers - self.max_threads)
+        self.status.emit(f'running: {running}, waiting: {waiting}, maximum thread: {self.max_threads}')
+
+    @QtCore.Slot(str, str)
+    def slot_receive_status(self, jobid, status):
+        WorkerManager._state[jobid][Status.Keys.status] = status
+        self.layoutChanged.emit()
+
+    @QtCore.Slot(str, int)
+    def slot_receive_progress(self, jobid, progress):
+        WorkerManager._state[jobid][Status.Keys.progress] = progress
+        self.layoutChanged.emit()
+
+    @QtCore.Slot(str, str)
+    def slot_receive_error(self, jobid, msg):
+        print(jobid, msg)
+
+    @QtCore.Slot(str)
+    def slot_done(self, jobid):
+        del WorkerManager._workers[jobid]
+        self.layoutChanged.emit()
+
+    def enqueue(self, worker: Worker):
+        '''
+        워커를 QThreadPool에 전달해 실행할 워커를 대기열에 넣는다.
+        '''
+        worker.signals.error.connect(self.slot_receive_error)
+        worker.signals.status.connect(self.slot_receive_status)
+        worker.signals.progress.connect(self.slot_receive_progress)
+        worker.signals.finished.connect(self.slot_done)
+
+        self.threadpool.start(worker)
+        WorkerManager._workers[worker.jobid] = worker
+        WorkerManager._state[worker.jobid] = Default.data.copy()
+
+        self.layoutChanged.emit()
+
+    def cleanup(self):
+        '''
+        worker_state에서 완료 또한 실패한 워커 제거
+        '''
+
+        for jobid, ste in list(WorkerManager._state.items()):
+            if ste[Status.Keys.status] in (Status.complete, Status.error):
+                del WorkerManager._state[jobid]
+        self.layoutChanged.emit()
+
+    @staticmethod
+    def kill(jobid):
+        if jobid in WorkerManager._workers:
+            WorkerManager._workers[jobid].kill()
+
+    # model interface
+    def data(self, index, role=...):
+        if role == QtCore.Qt.DisplayRole:
+            jobids = list(WorkerManager._state.keys())
+            jobid = jobids[index.row()]
+            return jobid, WorkerManager._state[jobid]
+
+    def rowCount(self, parent=...):
+        return len(WorkerManager._state)
+
+
+class ProgressbarDelegate(QtWidgets.QStyledItemDelegate):
+    """
+    QListView에 프로그레스바 표시를 위한 델리게이트
+    리스트 뷰는 각 행을 텍스트 값으로 표시하는데, 이것을 텍스트가 아닌 프로그레스로 그리도록...
+    """
+    def paint(self, painter, option, index):
+        # 모델에서 현재 행에 대한 데이터를 가져온다.
+        jobid, data = index.model().data(index, QtCore.Qt.DisplayRole)
+        # 작업이 활성화 되면, 프로그레스바가 그려지도록
+        if data[Status.Keys.progress] > 0:
+            color = QtGui.QColor(Colors.status[data[Status.Keys.status]])
+            brush = QtGui.QBrush()
+            brush.setColor(color)
+            brush.setStyle(QtCore.Qt.SolidPattern)
+
+            # 항목 행 크기는 option.rect()로 직사각형으로 그려지며 너비는 완료율에 의해 조정된다.
+            width = option.rect.width() * data[Status.Keys.progress] / 100
+            rect = QtCore.QRect(option.rect)
+            rect.setWidth(width)
+            painter.fillRect(rect, brush)
+
+        pen = QtGui.QPen()
+        pen.setColor(QtCore.Qt.black)
+        painter.drawText(option.rect, QtCore.Qt.AlignLeft, jobid)
+
+        if option.state & QtWidgets.QStyle.State_Selected:
+            painter.drawRect(option.rect)
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.workers = WorkerManager()
+        self.workers.status.connect(self.statusBar().showMessage)
+
+        layout = QtWidgets.QVBoxLayout()
+
+        self.progress = QtWidgets.QListView()
+        self.progress.setModel(self.workers)
+        delegate = ProgressbarDelegate()
+        self.progress.setItemDelegate(delegate)
+
+        layout.addWidget(self.progress)
+
+        self.text = QtWidgets.QPlainTextEdit()
+        self.text.setReadOnly(True)
+
+        start = QtWidgets.QPushButton('Start')
+        start.pressed.connect(self.start_worker)
+
+        stop = QtWidgets.QPushButton('Stop')
+        stop.pressed.connect(self.stop_worker)
+
+        clear = QtWidgets.QPushButton('Clear')
+        clear.pressed.connect(self.workers.cleanup)
+
+        layout.addWidget(self.text)
+        layout.addWidget(start)
+        layout.addWidget(stop)
+        layout.addWidget(clear)
+
+        w = QtWidgets.QWidget()
+        w.setLayout(layout)
+
+        self.setCentralWidget(w)
+
+    def start_worker(self):
+        x = random.randint(0, 1000)
+        y = random.randint(0, 1000)
+
+        w = Worker(x, y)
+        w.signals.result.connect(self.display_result)
+        w.signals.error.connect(self.display_result)
+
+        self.workers.enqueue(w)
+
+    def stop_worker(self):
+        selected = self.progress.selectedIndexes()
+        for idx in selected:
+            jobid, _ = self.workers.data(idx, QtCore.Qt.DisplayRole)
+            self.workers.kill(jobid)
+
+    def display_result(self, jobid, data):
+        self.text.appendPlainText(f'worker: {jobid}, {data}')
+
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication([])
+    mw = MainWindow()
+    mw.show()
+    app.exec_()
+```
