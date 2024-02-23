@@ -193,7 +193,8 @@ def test_sub(x, y, z):
 
 ## fixture (같은 설정은 조금 더 쉽게!)
 
-fixture란 같은 설정을 쉽게 접근할 수 있게 도와주는 데코레이터이다. 다음의 예를 보면 무엇을 말하는지 알 수 있다.
+fixture란 테스팅하는데 있어서 필요한 부분 혹은 조건들을 미리 준비해놓은 코드라고 생각하면 된다. 따라서 같은 설정을 쉽게 접근할 수 있게 
+도와준다. 다음의 예를 보면 무엇을 말하는지 알 수 있다.
 
 ```python
 import pytest
@@ -260,6 +261,60 @@ def test_div(calc):
 `@pytest.fixture` 데코레이터를 이용하여 fixture function인 `calc()`를 정의하였다. 그리고 이것을 이용하여 단위 테스트 함수 매개변수로 함수 주소 값을
 넘겼다. 단위 테스트 함수는 넘어온 매개변수로 해당 메서드를 호출한다.
 
+다음은 Database 객체를 여러 테스트 함수에서 쓸 수 있도록 fixture로 미리 만드는 예제이다.
+
+```python
+import pytest
+import mysql.connector as conn
+
+
+@pytest.fixture(scope='module')
+def connection():
+    return conn.connect(user='root', password='', host='127.0.0.1', database='dummy_db')
+
+
+def test_show_tables(connection):
+    try:
+      if connection.is_connected():
+          db_info = connection.get_server_info()
+          print('MySQL Version: ', db_info)
+
+          cursor = connection.cursor()
+          cursor.execute('SHOW TABLES')
+
+          row = cursor.fetchone()
+          while row is not None:
+              print(row)
+              row = cursor.fetchone()
+    except Exception as err:
+        print('Database error: ', err)
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def test_get_users(connection): ...
+```
+
+### fixture scope
+
+fixture가 실행되는 범위를 지정할 수 있다. scope를 이용하면 된다.
+
+총 5개의 scope가 있으며 범위의 크기는 다음과 같다.
+
+> function(default) < class < module < package < session
+
++ @pytest.fixture(scope='function')
+  + 함수 단위로 1회 생성 (기본값 설정이며, `@pytest.fixture`와 같다)
++ @pytest.fixture(scope='class')
+  + 클래스 단위로 1회 생성
++ @pytest.fixture(scope='module')
+  + 파일 단위로 1회 생성
++ @pytest.fixture(scope='package')
+  + 패키지 단위로 1회 생성
++ @pytest.fixture(scope='session')
+  + test session동안 1회 생성
 
 
 
