@@ -94,7 +94,7 @@ project/
 python -m pytest tests
 ```
 
-## Skip (특정 단위 테스트 건너뛰기)
+## skip (특정 단위 테스트 건너뛰기)
 
 `@pytest.mark.skip` 데코레이터를 사용하면 특정 단위 테스트를 건너 뛸 수 있다.
 
@@ -110,7 +110,63 @@ def test_add():
     assert calc.add(1, 2) == 2
 ```
 
-## Parametrize (매개변수 테스트)
+만약 테스트 함수 내에서 특정 조건일 때, skip 처리를 하고 싶다면 다음과 같이 할 수 있다.
+
+`pytest.mark.skip('skip message')`
+
+다음은 스크립트를 실행하는 플랫폼이 리눅스일 때 해당 단위 테스트를 스킵하는 예이다.
+
+```python
+def test_add():
+    if sys.platform.startswith('lin'):
+        pytest.skip('current platform: Linux')
+    calc = core_calc.Calculator()
+    assert calc.add(1, 2) == 2
+```
+
+## skipif (조건부로 특정 단위 테스트 건너뛰기)
+
+`@pytest.mark.skipif` 데코레이터를 사용하면 조건부로 건너뛸 수 있다.
+
+조건부로 단위 테스트를 건너뛰려면 `skipif`를 사용할 수 있다. 다음의 예는 Houdini Version 19.5.733 이하이면 단위 테스트를 건너뛰는 예이다.
+
+```python
+@pytest.mark.skipif(hou.applicationVersion() < (19, 5, 733), reason='Houdini19.5.733 버전 보다 높아야 함.')
+def test_mult():
+    calc = core_calc.Calculator()
+    assert calc.multiply(1, 2) == 2
+```
+
+조건 skip을 한번 만들어 놓으면 다른 곳에서도 사용할 수 있다.
+
+```python
+check_hou_min_ver = pytest.mark.skipif(hou.applicationVersion() < (19, 5, 733), reason='Houdini19.5.733 버전 보다 높아야 함.')
+
+
+@check_hou_min_ver
+def test_function1(): ...
+
+
+@check_hou_min_ver
+def test_function2(): ...
+```
+
+## importskip (모듈 테스트)
+
+`module_name = pytest.importorskip(modname='module_name')` importorskip함수를 이용하면 모듈 테스트를 수행할 수 있다.
+
+[importorskip](https://docs.pytest.org/en/stable/how-to/skipping.html#skip) 함수는 해당 모듈이 누락되었는지 테스트하여 만약 누락되었다면 
+이 함수가 호출되는 테스트 함수를 건너뛴다. 
+
+다음의 예제를 살펴보자. `hou` 모듈을 불러올 수 없다면 해당 테스트를 건너뛰는 예이다.
+
+```python
+def test_hou_version():
+    hou = pytest.importorskip(modname='hou')
+    assert hou.applicationVersion() > (19, 5, 733)
+```
+
+## parametrize (매개변수 테스트)
 
 `@pytest.mark.parametrize` 데코레이터를 사용하면 매개변수 테스트를 수행할 수 있다.
 
@@ -135,6 +191,109 @@ def test_sub(x, y, z):
     assert calc.subtract(x, y) == z
 ```
 
+## fixture (같은 설정은 조금 더 쉽게!)
 
-## fixture
+fixture란 같은 설정을 쉽게 접근할 수 있게 도와주는 데코레이터이다. 다음의 예를 보면 무엇을 말하는지 알 수 있다.
+
+```python
+import pytest
+
+import core.calculator as core_calc
+
+
+def test_add():
+    calc = core_calc.Calculator()
+    assert calc.add(1, 2) == 3
+
+
+@pytest.mark.parametrize('x, y, z', [(2, 1, 1), (4, 3, 1), (4, 5, -1)])
+def test_sub(x, y, z):
+    calc = core_calc.Calculator()
+    assert calc.subtract(x, y) == z
+
+
+def test_mult():
+    calc = core_calc.Calculator()
+    assert calc.multiply(1, 2) == 2
+
+
+def test_div():
+    calc = core_calc.Calculator()
+    assert calc.divide(4, 2) == 2
+```
+
+위의 코드를 보면 중복되는 코드가 보인다. `calc = core_calc.Calculator()` 코드는 Caculator 클래스의 인스턴스를 생성하는 코드인데
+각 테스트마다 필요하여 중복을 피할 수 없다.   
+만약, Calculator 클래스의 생성자에서 매개변수를 받도록 수정한다면 모든 테스트 코드를 그에 맞게 수정해야 한다. 따라서 유지 보수가 수월치 않은
+테스트 코드이다.
+
+이럴 때, 필요한 것이 바로 `fixture` 이다. `fixture`는 다음의 예제 코드를 보면 바로 알 수 있다.
+
+```python
+import pytest
+
+import core.calculator as core_calc
+
+
+@pytest.fixture
+def calc():
+    return core_calc.Calculator()
+
+
+def test_add(calc):
+    assert calc.add(1, 2) == 3
+
+
+@pytest.mark.parametrize('x, y, z', [(2, 1, 1), (4, 3, 1), (4, 5, -1)])
+def test_sub(x, y, z, calc):
+    assert calc.subtract(x, y) == z
+
+
+def test_mult(calc):
+    assert calc.multiply(1, 2) == 2
+
+
+def test_div(calc):
+    assert calc.divide(4, 2) == 2
+```
+
+`@pytest.fixture` 데코레이터를 이용하여 fixture function인 `calc()`를 정의하였다. 그리고 이것을 이용하여 단위 테스트 함수 매개변수로 함수 주소 값을
+넘겼다. 단위 테스트 함수는 넘어온 매개변수로 해당 메서드를 호출한다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
