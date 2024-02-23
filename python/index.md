@@ -207,3 +207,4 @@
 
 ### [Chapter 30. 테스트 주도 개발(Test Driven Development, TDD)](chapter_30/index.md)
 - 30-1. TDD 개요
+- 30-2. Python에서의 TDD
