@@ -253,3 +253,11 @@ UPDATE <table> SET <field> = '<value>' WHERE <field> = <value>;
 
 ex) UPDATE test_tbl SET name = 'scii' WHERE id = 1;
 ```
+
+a_table에서 데이터를 `SELECT` 한 후, 그것을 b_table에 업데이트하는 Query는 다음과 같다.
+
+```sql
+UPDATE b_table AS _bt, (SELECT asset_cate, asset_type FROM a_table) AS _at
+  SET _bt.asset_cate=_at.asset_cate, _bt.asset_type=_bt.asset_type
+  WHERE _bt.id = _at.id;
+```
