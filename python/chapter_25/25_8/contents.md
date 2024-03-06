@@ -2,6 +2,42 @@
 
 > MySQL 기준으로 작성됨
 
+<table style="border: 2px;">
+    <tr>
+        <td>권한</td>
+        <td>의미</td>
+        <td>사용자</td>
+    </tr>
+    <tr>
+        <td>CREATE, ALTER, DROP</td>
+        <td>테이블 생성, 변경, 삭제</td>
+        <td rowspan="2">일반 사용자, 관리자</td>
+    </tr>
+    <tr>
+        <td>SELECT, INSERT, UPDATE, DELETE</td>
+        <td>테이블의 레코드 조회, 입력, 수정, 삭제</td>
+    </tr>
+    <tr>
+        <td>RELOAD</td>
+        <td>권한 부여된 내용을 갱신</td>
+        <td rowspan="2">관리자</td>
+    </tr>
+    <tr>
+        <td>SHUTDOWN</td>
+        <td>서버 종료 작업 실행</td>
+    </tr>
+    <tr>
+        <td>ALL</td>
+        <td>모든 권한 허용</td>
+        <td>관리자와 동급</td>
+    </tr>
+    <tr>
+        <td>USAGE</td>
+        <td>권한 없이 계정만 생성</td>
+    </tr>
+</table>
+
+
 Database 사용자 목록을 조회하기 위해서는 MySQL의 기본 스키마인 `mysql` 데이터베이스의 `user` 테이블을 조회하면 된다.
 
 ```sql

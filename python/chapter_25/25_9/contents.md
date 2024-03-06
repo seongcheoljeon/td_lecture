@@ -8,24 +8,41 @@
 ```yaml
 version: '3'
 services:
-    mysql:
-        image: mysql:latest
-        restart: always
-        container_name: mysql
-        ports:
-          - "3306:3306"
-        environment:
-            MYSQL_ROOT_PASSWORD: <password>
-            TZ: Asia/Seoul
-        command:
-            - --character-set-server=utf8mb4
-            - --collation-server=utf8mb4_unicode_ci
-        volumes:
-            - <data_path>:/var/lib/mysql
+  mysql:
+    image: mysql:latest
+    restart: always
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: <password>
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - <config_path>:/etc/mysql/conf.d
+      - <data_path>:/var/lib/mysql
 ```
 
 ```shell
 docker compose up -d
 docker compose logs -f mysql
 docker compose exec -it mysql /bin/bash
+```
+
+다음은 my.cnf 파일의 내용이다.
+
+```shell
+[mysqld]
+character-set-server            = utf8mb4
+collation-server                = utf8mb4_unicode_ci
+secure-file-priv                = ""
+```
+
+도커를 재시작했을 때, `World-writable config file '/etc/my.cnf' is ignored` 라는 메시지가 나온다면 
+`my.cnf` 권한을 맞춰줘야 한다.
+
+```shell
+chmod 755 /etc/mycnf
 ```
