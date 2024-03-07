@@ -8,19 +8,149 @@
 
 ## EVENT Scheduler 설정
 
-Event Scheduler 사용하기 위해선 설정을 `ON`으로 변경해주어야 한다. 이 명령은 다음과 같다.
+* Event Scheduler 사용하기 위해선 설정을 `ON`으로 변경해주어야 한다. 이 명령은 다음과 같다.
 
 ```sql
 SET GLOBAL event_scheduler = ON;
 ```
 
-이벤트 설정 확인 명령은 다음과 같다.
+* 이벤트 설정 확인 명령은 다음과 같다.
 
 ```sql
 SHOW VARIABLES LIKE 'event%';
 ```
 
-## EVENT Scheduler 사용
+## EVENT Scheduler 생성
+
+* 이벤트 스케쥴러 형식
+
+```sql
+CREATE EVENT [IF NOT EXISTS]
+    <event_name>
+    ON SCHEDULE <schedule> # 반복할 시간 및 기간
+    [ON COMPLETION [NOT] PRESERVE]
+    [ENABLE | DISABLE | DISABLE ON SLAVE]
+    [COMMENT <이벤트 설명>]
+    DO 
+        <수행 SQL>;
+        
+schedule: {
+    AT TIMESTAMP [+ INTERVAL interval] ... | EVERY INTERVAL
+    [STARTS TIMESTAMP [+ INTERVAL interval] ...]
+    [ENDS TIMESTAMP [+ INTERVAL interval] ...]
+}
+
+interval: {
+    quantity: {
+        YEAR | QUARTER | MONTH | DAY | HOUR | MINUTE | WEEK | SECONDS | YEAR_MONTH | DAY_HOUR | DAY_MINUTE |
+        DAY_SECOND | HOUR_MINUTE | HOUR_SECOND | MINUTE_SECOND
+    }
+}
+```
+
++ __AT <timestamp>__
+  + 특정 시간에 단 한번 실행
+    + ex) ON SCHEDULE AT '2024-03-07 00:00:00'
++ __EVERY <interval>__
+  + 반복 실행
+    + ex) ON SCHEDULE EVERY 1 DAY
++ __STARTS <timestamp>, ENDS <timestamp>__
+  + 시작일 ~ 종료일 지정
+  + ex) ON SCHEDULE EVERY 1 DAY STARTS '2024-01-01 00:00:00' ENDS '2024-12-31 00:00:00'
++ __ON COMPLETION NOT PRESERVE ENABLE__
+  + 해당 설정은 이벤트를 수행 후 삭제 여부를 지정한다.
+  + 이벤트 수행 후, 이벤트를 삭제하고 싶지 않다면 `NOT`을 제거한 __ON COMPLETION PRESERVE ENABLE__ 을 사용한다.
+
+* 현재 시간+10초부터 이벤트 스케쥴러 시작하여 매 10초마다 INSERT SQL 실행
+
+```sql
+CREATE EVENT IF NOT EXISTS  ev_insert_to_test_table
+    ON SCHEDULE EVERY 10 SECOND
+    STARTS (TIMESTAMP (CURRENT_TIME) + INTERVAL 10 SECOND )
+    COMMENT 'every time 10 sec!!'
+    DO
+        INSERT INTO test_table(name, ctime) VALUES ('event data', NOW());
+```
+
+* 현재 시간+10초에 단 한번 INSERT SQL 실행
+
+```sql
+CREATE EVENT IF NOT EXISTS ev_once_cmd
+    ON SCHEDULE
+        AT (TIMESTAMP (CURRENT_TIME) + INTERVAL 10 SECOND )
+    ON COMPLETION PRESERVE
+    ENABLE
+    COMMENT 'once command event'
+    DO
+        INSERT INTO test_table(name, ctime) VALUES ('once event data', NOW());
+```
+
+* 매일 새벽 3시에 `history` 테이블에서 30일 전의 데이터를 삭제
+
+```sql
+# `ev_daily_delete` 라는 이름의 이벤트 생성
+CREATE EVENT IF NOT EXISTS ev_daily_delete
+# 해당 이벤트가 매일 실행되도록 스케쥴 설정
+  ON SCHEDULE EVERY 1 DAY
+# 해당 이벤트가 처음 실행되는 시간 설정
+    STARTS (TIMESTAMP(CURRENT_DATE) + INTERVAL 1 DAY)
+    DO
+# `history` 테이블에서 30일 이전의 데이터를 삭제한다.
+    DELETE FROM history WHERE created_date < DATE(NOW() - INTERVAL 30 DAY);
+```
+
+* 현재 시각으로부터 10분 후 모든 데이터 제거
+
+```sql
+CREATE EVENT IF NOT EXISTS history_data
+  ON SCHEDULE
+    AT DATE_ADD(NOW(), INTERVAL 10 MINUTE)
+  ON COMPLETION NOT PRESERVE
+  ENABLE
+  COMMENT 'delete data'
+  DO
+    TRUNCATE history;
+```
+
+## EVENT Scheduler 목록 확인
+
+```sql
+SELECT * FROM information_schema.EVENTS;
+
+# 혹은
+
+SHOW EVENTS;
+```
+
+## EVENT Scheduler 삭제
+
+```sql
+DROP EVENT IF EXISTS <이벤트 이름>;
+```
+
+## EVENT Schduler 수정
+
+```sql
+ALTER 
+    [DEFINER = user]
+    EVENT <event_name>
+    [ON SCHEDULE schedule]
+    [ON COMPLETION [NOT] PRESERVE]
+    [RENAME TO <new_event_name>]
+    [ENABLE | DISABLE | DISABLE ON SLAVE]
+    [COMMENT 'event comment']
+    [DO event_body]
+```
+
+이벤트를 수정하려면 `ALTER EVENT` 명령을 사용한다. 
+
+다음의 예는 생성한 이벤트를 매일 오전 10시에 실행되도록 변경하는 예이다.
+
+```sql
+ALTER EVENT ev_daily_delete
+  ON SCHEDULE EVERY 1 DAY
+  STARTS (TIMESTAMP(CURRENT_DATE) + INTERVAL 1 DAY + INTERVAL 1 HOUR);
+```
 
 ---
 
