@@ -1,140 +1,60 @@
-# 25-8. 계정 생성/삭제 및 권한 부여/취소 (CREATE USER, DROP USER, GRANT, REVOKE)
+# EVENT (Scheduler)
 
-> MySQL 기준으로 작성됨
+> 이벤트 스케쥴러 (Event Scheduler)
+> > 이벤트 스케쥴러는 말 그대로 이벤트 발생 계획을 말하는 것이다. 이를 테면, 한 달에 한 번 데이터베이스 데이터 백업, 임시 데이터 삭제등이 있을 것이다.
 
-<table style="border: 2px;">
-    <tr>
-        <td>권한</td>
-        <td>의미</td>
-        <td>사용자</td>
-    </tr>
-    <tr>
-        <td>CREATE, ALTER, DROP</td>
-        <td>테이블 생성, 변경, 삭제</td>
-        <td rowspan="2">일반 사용자, 관리자</td>
-    </tr>
-    <tr>
-        <td>SELECT, INSERT, UPDATE, DELETE</td>
-        <td>테이블의 레코드 조회, 입력, 수정, 삭제</td>
-    </tr>
-    <tr>
-        <td>RELOAD</td>
-        <td>권한 부여된 내용을 갱신</td>
-        <td rowspan="2">관리자</td>
-    </tr>
-    <tr>
-        <td>SHUTDOWN</td>
-        <td>서버 종료 작업 실행</td>
-    </tr>
-    <tr>
-        <td>ALL</td>
-        <td>모든 권한 허용</td>
-        <td>관리자와 동급</td>
-    </tr>
-    <tr>
-        <td>USAGE</td>
-        <td>권한 없이 계정만 생성</td>
-    </tr>
-</table>
+`EVENT Scheduler`는 주기적으로 데이터베이스에 작업을 해야 할 경우 사용한다. 만약 지속적으로 쌓이는 임시(Temporary) 데이터가 있을 때, 해당 테이블을
+일정 간격으로 지워줌으로써 용량 차지가 되지 않게끔 한다.
 
+## EVENT Scheduler 설정
 
-Database 사용자 목록을 조회하기 위해서는 MySQL의 기본 스키마인 `mysql` 데이터베이스의 `user` 테이블을 조회하면 된다.
+Event Scheduler 사용하기 위해선 설정을 `ON`으로 변경해주어야 한다. 이 명령은 다음과 같다.
 
 ```sql
-USE mysql;
-
-SELECT host, user, plugin, authentication_string FROM user;
+SET GLOBAL event_scheduler = ON;
 ```
 
-## 사용자 생성 (CREATE USER)
-
-사용자 생성은 `CREATE USER`명령으로 생성할 수 있다.
+이벤트 설정 확인 명령은 다음과 같다.
 
 ```sql
-ex) CREATE USER 'user_name'@'host' IDENTIFIED BY 'password';
-
-# 계정 생성 (내부 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'localhost' IDENTIFIED BY '1234';
-
-# 계정 생성 (외부 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
-
-# 계정 생성 (특정 IP만 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'152.255.795.10' IDENTIFIED BY '1234';
-
-# 계정 생성 (특정 IP 대역을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'192.168.%' IDENTIFIED BY '1234';
+SHOW VARIABLES LIKE 'event%';
 ```
 
-## 사용자 삭제 (DROP USER or DELETE)
+## EVENT Scheduler 사용
 
-`DROP USER` 혹은 `DELETE` 명령어를 통해 사용자를 삭제할 수 있다.
+---
 
-```sql
-ex) DROP USER ['user_name']@['server_name'];
+# Cron VS EVENT Scheduler 장단점
 
-DROP USER 'seongcheoljeon'@'%';
+> Cron
+> > Cron은 특정 시간에 특정 동작을 하는 것을 말한다. 대표적으로 [Linux Cron](https://docs.rockylinux.org/ko/guides/automation/cron_jobs_howto)이 있다. 그 외에는 `Spring Scheduling`, `Node-cron` 등이 있다.
 
-# 혹은
+> Event Scheduler
+> > DB에서 정기적으로 특정 시간에 작업을 수행시킬 수 있다. 대표적으로는 `MySQL`의 `Event scheduler`, `Oracle scheduler` 등이 있다.
 
-DELETE FROM user WHERE user='user';
-```
++ __Cron__
+  + __장점__
+    + 예상하기 쉬운 위치에 존재 (이 점을 과소평가해선 안 된다).
+    + 원하는 곳으로 성공/오류 메시지를 전달할 수 있음.
+    + 웹 서버와 DB의 역할을 분리하여 관리 가능.
+    + 일부 DB 작업은 MySQL이 오프라인 상태(ex: 전체 백업)로 진행되는데 이러한 작업에는 크론을 사용해야 함.
+      + 일부 작업은 크론으로, 일부 작업은 MySQL Event로 수행하는 것은 상당히 좋지 않음.
+    + Shell 스크립트로 운용 시, Event에 Dependency(의존성)를 부여할 수 있음.
+  + __단점__
+    + DB와의 통신으로인해 지연 시간 발생.
 
-## 사용자 권한 부여
++ __Event Scheduler__
+  + __장점__
+    + 외부 스크립트를 사용할 필요 없음.
+    + 매변 쿼리를 컴파일할 필요가 없음.
+    + 성능이 뛰어남.
+  + __단점__
+    + 기능 변경 시, DB에 접근한 후 수정해야 함.
+    + 이벤트 존재유무 파악하기 힘듦.
 
-사용자에게 권한을 부여할 때는 `GRANT` 명령어를 통해 부여할 수 있다.
+## 정리
 
-```sql
-# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'];
+SQL의 작업이라면 MySQL Event에서 처리하는 것이 합리적일 것이다. 즉, MySQL Event에서 `데이터 정리`, `최적화` 등의 작업은 MySQL EVENT가 
+더 나은 선택이다.
 
-# 권한 설정 (모든 DB에 모든 권한 부여)
-GRANT ALL PRIVILEGES ON *.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB에 모든 권한 부여
-GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB에 특정 권한 부여
-GRANT SELECT, INSERT, UPDATE ON test_db.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB의 특정 테이블에 SELECT 권한 부여
-GRANT SELECT test_db.asset_table TO 'seongcheoljeon'@'%';
-
-# 특정 DB의 특정 테이블의 column1, column2에 UPDATE 권한 부여
-GRANT UPDATE(column1, column2) ON test_db.asset_table TO 'seongcheoljeon'@'%';
-```
-
-## 사용자 생성과 동시에 권한 부여
-
-사용자 계정 생성함과 동시에 권한을 부여할 수 있다.
-
-```sql
-# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'] IDENTIFIED BY ['password'];
-
-GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
-```
-
-## 사용자 권한 취소
-
-사용자 계정의 권한 취소는 `REVOKE` 명령어로 취소할 수 있으며, `GRANT` 명령어 사용법과 비슷하다.
-
-```sql
-# ex) REVOKE ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name']; 
-
-# 모든 권한 취소
-REVOKE ALL PRIVILEGES ON *.* FROM 'seongcheoljeon'@'%';
-
-# INSERT 권한 취소
-REVOKE INSERT ON *.* FROM 'seongcheoljeon'@'%';
-```
-
-## 권한 설정 적용 (변경 사항 반영)
-
-```sql
-FLUSH PRIVILEGES;
-```
-
-## 권한 부여 상태 확인
-
-```sql
-SHOW GRANTS FOR 'seongcheoljeon'@'%';
-```
+만약 SQL의 작업이 아니라면, `Cron`을 사용하는 것이 좋은 선택이다.

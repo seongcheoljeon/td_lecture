@@ -43,3 +43,26 @@ SELECT <field1, field2, ...> FROM <첫 번째 테이블(LEFT)>
 ## CROSS JOIN (상호 조인)
 
 ## <center><img src="./images/cross_join.png" width="500" height="300"></center>
+
+> `CROSS JOIN`은 한쪽 테이블의 행 하나당 다른 쪽 테이블의 모든 행을 하나씩 모든 행들을 각각 조인한다.
+
+즉, A테이블 하나의 행을 B테이블의 모든 행들에 조인한다 (1:N). `CROSS JOIN`의 결과 행의 개수는 `A테이블 행의 개수 X B테이블 행의 개수`가 된다.
+그래서 `CROSS JOIN`은 `카티션 곱(Catesian Product)`이라고도 부른다.
+
+다음은 `CROSS JOIN`의 기본 문법이다. `INNER JOIN`과 `OUTER JOIN`과는 다르게 `ON`구문은 사용하지 않는다.
+
+```sql
+SELECT * FROM a_table CROSS JOIN b_table;
+```
+
+## SELF JOIN (자체 조인)
+
+`SELF JOIN`은 자기 자신에게 조인하는 것이다. 같은 테이블에 두 번 참조해야 하는 경우 사용한다.
+
+셀프 조인은 자기 자신과 조인하므로 1개의 테이블을 사용한다. 별도의 문법이 있는 것은 아니며 1개로 조인하면 자체 조인이 된다.
+
+```sql
+SELECT <field1, field2, ...> FROM <table> AS A
+  INNER JOIN <table> AS B
+  [WHERE 검색 조건];
+```

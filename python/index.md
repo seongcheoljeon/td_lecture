@@ -176,8 +176,9 @@
 - 25-5. 내장 함수
 - 25-6. 트랜잭션
 - 25-7. TRIGGER
-- 25-8. 계정 생성/삭제 및 권한 부여/취소 (CREATE USER, DROP USER, GRANT, REVOKE)
-- 25-9. Docker를 이용한 MySQL 설치
+- 25-8. EVENT (Scheduler)
+- 25-9. 계정 생성/삭제 및 권한 부여/취소 (CREATE USER, DROP USER, GRANT, REVOKE)
+- 25-10. Docker를 이용한 MySQL 설치
 
 ### Chapter 26. 데이터 모델링
 - 26-1. 개체, 관계, 속성의 이해
