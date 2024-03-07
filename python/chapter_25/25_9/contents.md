@@ -1,141 +1,70 @@
-# 25-9. 계정 생성/삭제 및 권한 부여/취소 (CREATE USER, DROP USER, GRANT, REVOKE)
+# 25-9. PROCEDURE & FUNCTION
 
-> MySQL 기준으로 작성됨
+## PROCEDURE
 
-<table style="border: 2px;">
-    <tr>
-        <td>권한</td>
-        <td>의미</td>
-        <td>사용자</td>
-    </tr>
-    <tr>
-        <td>CREATE, ALTER, DROP</td>
-        <td>테이블 생성, 변경, 삭제</td>
-        <td rowspan="2">일반 사용자, 관리자</td>
-    </tr>
-    <tr>
-        <td>SELECT, INSERT, UPDATE, DELETE</td>
-        <td>테이블의 레코드 조회, 입력, 수정, 삭제</td>
-    </tr>
-    <tr>
-        <td>RELOAD</td>
-        <td>권한 부여된 내용을 갱신</td>
-        <td rowspan="2">관리자</td>
-    </tr>
-    <tr>
-        <td>SHUTDOWN</td>
-        <td>서버 종료 작업 실행</td>
-    </tr>
-    <tr>
-        <td>ALL</td>
-        <td>모든 권한 허용</td>
-        <td>관리자와 동급</td>
-    </tr>
-    <tr>
-        <td>USAGE</td>
-        <td>권한 없이 계정만 생성</td>
-        <td></td>
-    </tr>
-</table>
+> 프로시저 (Procedure) 란?
+> > 프로시저는 `일련의 쿼리를 모아 마치 하나의 함수처럼 실행`하기 위한 쿼리 집합이다.
 
++ __프로시저 장점__
+  + 하나의 요청으로 여러 SQL 문을 실행할 수 있다. (네트워크 부하를 줄임)
+  + 내부 중간 코드로 변환되어 처리 속도가 빨라진다.
+  + DB 트리거와 결합하여 복잡한 규칙에 의한 데이터의 참조무결성 유지가 가능하게 된다.
++ __프로시저 단점__
+  + 재사용성이 좋지 못하다.
 
-Database 사용자 목록을 조회하기 위해서는 MySQL의 기본 스키마인 `mysql` 데이터베이스의 `user` 테이블을 조회하면 된다.
+    
+## FUNCTION
+
+프로시저(Procedure)와 비슷하지만, 함수의 경우 특별한 데이터 타입으로 특별한 연산을 할 때 더 용이하다.
+
+기본 형태는 다음과 같다.
 
 ```sql
-USE mysql;
-
-SELECT host, user, plugin, authentication_string FROM user;
+DELIMITER $$
+CREATE FUNCTION IF NOT EXISTS 함수명(매개변수 자료형) RETURNS 반환_자료형
+BEGIN
+    DECLARE 변수명 <자료형> DEFAULT NULL;
+    
+    수행할 쿼리
+    RETURN 반환값
+END $$
+DELIMITER ;
 ```
 
-## 사용자 생성 (CREATE USER)
-
-사용자 생성은 `CREATE USER`명령으로 생성할 수 있다.
+다음은 두 수를 받아 곱한 결과를 반환하는 함수이다.
 
 ```sql
-ex) CREATE USER 'user_name'@'host' IDENTIFIED BY 'password';
-
-# 계정 생성 (내부 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'localhost' IDENTIFIED BY '1234';
-
-# 계정 생성 (외부 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
-
-# 계정 생성 (특정 IP만 접근을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'152.255.795.10' IDENTIFIED BY '1234';
-
-# 계정 생성 (특정 IP 대역을 허용하는 사용자 추가)
-CREATE USER 'seongcheoljeon'@'192.168.%' IDENTIFIED BY '1234';
+DELIMITER $$
+CREATE FUNCTION IF NOT EXISTS multiply(a DOUBLE, b DOUBLE) RETURNS DOUBLE
+BEGIN
+    RETURN a * b;
+END $$
+DELIMITER;
 ```
 
-## 사용자 삭제 (DROP USER or DELETE)
+위에서 BEGIN ~ END 사이에 구문 문자인 `; (세미콜론)`때문에 오류가 발생하지 않도록 `DELIMITER`명령어를 통해 기존 구문 문자인
+`; (세미콜론)`을 `$$`로 바꿔주는 해준다.
 
-`DROP USER` 혹은 `DELETE` 명령어를 통해 사용자를 삭제할 수 있다.
+함수는 다음과 같이 `SELECT`명령어를 통해 사용할 수 있다.
 
 ```sql
-ex) DROP USER ['user_name']@['server_name'];
-
-DROP USER 'seongcheoljeon'@'%';
-
-# 혹은
-
-DELETE FROM user WHERE user='user';
+SELECT 함수명(매개변수);
 ```
 
-## 사용자 권한 부여
-
-사용자에게 권한을 부여할 때는 `GRANT` 명령어를 통해 부여할 수 있다.
+함수에서 변수 선언은 아래 명령어를 통해 할 수 있다. 
 
 ```sql
-# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'];
-
-# 권한 설정 (모든 DB에 모든 권한 부여)
-GRANT ALL PRIVILEGES ON *.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB에 모든 권한 부여
-GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB에 특정 권한 부여
-GRANT SELECT, INSERT, UPDATE ON test_db.* TO 'seongcheoljeon'@'%';
-
-# 특정 DB의 특정 테이블에 SELECT 권한 부여
-GRANT SELECT test_db.asset_table TO 'seongcheoljeon'@'%';
-
-# 특정 DB의 특정 테이블의 column1, column2에 UPDATE 권한 부여
-GRANT UPDATE(column1, column2) ON test_db.asset_table TO 'seongcheoljeon'@'%';
+DECLARE <변수명> <자료형>;
 ```
 
-## 사용자 생성과 동시에 권한 부여
-
-사용자 계정 생성함과 동시에 권한을 부여할 수 있다.
+### 함수 확인
 
 ```sql
-# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'] IDENTIFIED BY ['password'];
-
-GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
+SHOW CREATE FUNCTION <함수명>;
 ```
 
-## 사용자 권한 취소
-
-사용자 계정의 권한 취소는 `REVOKE` 명령어로 취소할 수 있으며, `GRANT` 명령어 사용법과 비슷하다.
+### 함수 삭제
 
 ```sql
-# ex) REVOKE ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name']; 
-
-# 모든 권한 취소
-REVOKE ALL PRIVILEGES ON *.* FROM 'seongcheoljeon'@'%';
-
-# INSERT 권한 취소
-REVOKE INSERT ON *.* FROM 'seongcheoljeon'@'%';
-```
-
-## 권한 설정 적용 (변경 사항 반영)
-
-```sql
-FLUSH PRIVILEGES;
-```
-
-## 권한 부여 상태 확인
-
-```sql
-SHOW GRANTS FOR 'seongcheoljeon'@'%';
+DROP FUNCTION <함수명>;
 ```

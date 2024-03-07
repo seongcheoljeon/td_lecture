@@ -1,48 +1,141 @@
-# 25-10. Docker를 이용한 MySQL 설치
+# 25-10. 계정 생성/삭제 및 권한 부여/취소 (CREATE USER, DROP USER, GRANT, REVOKE)
 
-> docker를 이용하여 MySQL을 설치하는 과정이다. docker를 이용하면 어느 환경에서건 작동하는 Database server를 구축할 수 있다.
+> MySQL 기준으로 작성됨
 
-`docker compose`는 여러 개의 도커 컨테이너를 실행시키는 툴이다. `docker compose`는 `YAML`형식의 문법을 사용하며 애플리케이션의 
-서비스를 구성할 수 있다.
+<table style="border: 2px;">
+    <tr>
+        <td>권한</td>
+        <td>의미</td>
+        <td>사용자</td>
+    </tr>
+    <tr>
+        <td>CREATE, ALTER, DROP</td>
+        <td>테이블 생성, 변경, 삭제</td>
+        <td rowspan="2">일반 사용자, 관리자</td>
+    </tr>
+    <tr>
+        <td>SELECT, INSERT, UPDATE, DELETE</td>
+        <td>테이블의 레코드 조회, 입력, 수정, 삭제</td>
+    </tr>
+    <tr>
+        <td>RELOAD</td>
+        <td>권한 부여된 내용을 갱신</td>
+        <td rowspan="2">관리자</td>
+    </tr>
+    <tr>
+        <td>SHUTDOWN</td>
+        <td>서버 종료 작업 실행</td>
+    </tr>
+    <tr>
+        <td>ALL</td>
+        <td>모든 권한 허용</td>
+        <td>관리자와 동급</td>
+    </tr>
+    <tr>
+        <td>USAGE</td>
+        <td>권한 없이 계정만 생성</td>
+        <td></td>
+    </tr>
+</table>
 
-```yaml
-version: '3'
-services:
-  mysql:
-    image: mysql:latest
-    restart: always
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: <password>
-      TZ: Asia/Seoul
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - <config_path>:/etc/mysql/conf.d
-      - <data_path>:/var/lib/mysql
+
+Database 사용자 목록을 조회하기 위해서는 MySQL의 기본 스키마인 `mysql` 데이터베이스의 `user` 테이블을 조회하면 된다.
+
+```sql
+USE mysql;
+
+SELECT host, user, plugin, authentication_string FROM user;
 ```
 
-```shell
-docker compose up -d
-docker compose logs -f mysql
-docker compose exec -it mysql /bin/bash
+## 사용자 생성 (CREATE USER)
+
+사용자 생성은 `CREATE USER`명령으로 생성할 수 있다.
+
+```sql
+ex) CREATE USER 'user_name'@'host' IDENTIFIED BY 'password';
+
+# 계정 생성 (내부 접근을 허용하는 사용자 추가)
+CREATE USER 'seongcheoljeon'@'localhost' IDENTIFIED BY '1234';
+
+# 계정 생성 (외부 접근을 허용하는 사용자 추가)
+CREATE USER 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
+
+# 계정 생성 (특정 IP만 접근을 허용하는 사용자 추가)
+CREATE USER 'seongcheoljeon'@'152.255.795.10' IDENTIFIED BY '1234';
+
+# 계정 생성 (특정 IP 대역을 허용하는 사용자 추가)
+CREATE USER 'seongcheoljeon'@'192.168.%' IDENTIFIED BY '1234';
 ```
 
-다음은 my.cnf 파일의 내용이다.
+## 사용자 삭제 (DROP USER or DELETE)
 
-```shell
-[mysqld]
-character-set-server            = utf8mb4
-collation-server                = utf8mb4_unicode_ci
-secure-file-priv                = ""
+`DROP USER` 혹은 `DELETE` 명령어를 통해 사용자를 삭제할 수 있다.
+
+```sql
+ex) DROP USER ['user_name']@['server_name'];
+
+DROP USER 'seongcheoljeon'@'%';
+
+# 혹은
+
+DELETE FROM user WHERE user='user';
 ```
 
-도커를 재시작했을 때, `World-writable config file '/etc/my.cnf' is ignored` 라는 메시지가 나온다면 
-`my.cnf` 권한을 맞춰줘야 한다.
+## 사용자 권한 부여
 
-```shell
-chmod 755 /etc/mycnf
+사용자에게 권한을 부여할 때는 `GRANT` 명령어를 통해 부여할 수 있다.
+
+```sql
+# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'];
+
+# 권한 설정 (모든 DB에 모든 권한 부여)
+GRANT ALL PRIVILEGES ON *.* TO 'seongcheoljeon'@'%';
+
+# 특정 DB에 모든 권한 부여
+GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%';
+
+# 특정 DB에 특정 권한 부여
+GRANT SELECT, INSERT, UPDATE ON test_db.* TO 'seongcheoljeon'@'%';
+
+# 특정 DB의 특정 테이블에 SELECT 권한 부여
+GRANT SELECT test_db.asset_table TO 'seongcheoljeon'@'%';
+
+# 특정 DB의 특정 테이블의 column1, column2에 UPDATE 권한 부여
+GRANT UPDATE(column1, column2) ON test_db.asset_table TO 'seongcheoljeon'@'%';
+```
+
+## 사용자 생성과 동시에 권한 부여
+
+사용자 계정 생성함과 동시에 권한을 부여할 수 있다.
+
+```sql
+# ex) GRANT ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name'] IDENTIFIED BY ['password'];
+
+GRANT ALL PRIVILEGES ON test_db.* TO 'seongcheoljeon'@'%' IDENTIFIED BY '1234';
+```
+
+## 사용자 권한 취소
+
+사용자 계정의 권한 취소는 `REVOKE` 명령어로 취소할 수 있으며, `GRANT` 명령어 사용법과 비슷하다.
+
+```sql
+# ex) REVOKE ALL PRIVILEGES ON [database_name].[table_name] TO ['user_name']@['server_name']; 
+
+# 모든 권한 취소
+REVOKE ALL PRIVILEGES ON *.* FROM 'seongcheoljeon'@'%';
+
+# INSERT 권한 취소
+REVOKE INSERT ON *.* FROM 'seongcheoljeon'@'%';
+```
+
+## 권한 설정 적용 (변경 사항 반영)
+
+```sql
+FLUSH PRIVILEGES;
+```
+
+## 권한 부여 상태 확인
+
+```sql
+SHOW GRANTS FOR 'seongcheoljeon'@'%';
 ```
