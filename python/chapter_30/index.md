@@ -1,4 +1,5 @@
-# Chapter 30. 테스트 주도 개발(Test Driven Development, TDD)
+# Chapter 29. Design Pattern
 
-- [30-1. TDD 개요](30_1/contents.md)
-- [30-2. Python에서의 TDD](30_2/contents.md)
+- [29-1. 디자인 패턴 개요](29_1/contents.md)
+- [29-2. Singleton Pattern](29_2/contents.md)
+ 

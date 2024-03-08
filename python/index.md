@@ -190,7 +190,12 @@
 - 27-1. Python의 데이터베이스 모듈
 - 27-2. Web Server와 Database Server 그리고 Python 연동
 
-### [Chapter 28. Algorithm](chapter_28/index.md)
+### [Chapter 28. Back-end](chapter_28/index.md)
+- 28-1. 백엔드(back-end)에 대하여
+- 28-2. Web Framework 소개
+- 28-3. Flask를 이용한 API 작성
+
+### [Chapter 29. Algorithm](chapter_29/index.md)
 - 28-1. 알고리즘 개요
 - 28-2. 빅오(Big-O 표기법)
 - 28-3. 연결 리스트(Linked List)
@@ -204,10 +209,10 @@
 - 28-11. 이진 검색 알고리즘
 - 문제 풀이
 
-### [Chapter 29. Design Pattern](chapter_29/index.md)
+### [Chapter 30. Design Pattern](chapter_30/index.md)
 - 29-1. 디자인 패턴 개요
 - 29-2. Singleton Pattern
 
-### [Chapter 30. 테스트 주도 개발(Test Driven Development, TDD)](chapter_30/index.md)
+### [Chapter 31. 테스트 주도 개발(Test Driven Development, TDD)](chapter_31/index.md)
 - 30-1. TDD 개요
 - 30-2. Python에서의 TDD
