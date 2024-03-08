@@ -196,23 +196,24 @@
 - 28-3. Flask를 이용한 API 작성
 
 ### [Chapter 29. Algorithm](chapter_29/index.md)
-- 28-1. 알고리즘 개요
-- 28-2. 빅오(Big-O 표기법)
-- 28-3. 연결 리스트(Linked List)
-- 28-4. 이중 연결 리스트
-- 28-5. 스택(Stack) & 큐(Queue)
-- 28-6. 트리(Tree)
-- 28-7. Selection/Insertion 정렬 알고리즘
-- 28-8. Bubble/Shell 정렬 알고리즘
-- 28-9. Quick/Radix 정렬 알고리즘
-- 28-10. Merge/Heap 정렬 알고리즘
-- 28-11. 이진 검색 알고리즘
+- 29-1. 알고리즘 개요
+- 29-2. 빅오(Big-O 표기법)
+- 29-3. 연결 리스트(Linked List)
+- 29-4. 이중 연결 리스트
+- 29-5. 스택(Stack) & 큐(Queue)
+- 29-6. 트리(Tree)
+- 29-7. Selection/Insertion 정렬 알고리즘
+- 29-8. Bubble/Shell 정렬 알고리즘
+- 29-9. Quick/Radix 정렬 알고리즘
+- 29-10. Merge/Heap 정렬 알고리즘
+- 29-11. 이진 검색 알고리즘
 - 문제 풀이
 
 ### [Chapter 30. Design Pattern](chapter_30/index.md)
-- 29-1. 디자인 패턴 개요
-- 29-2. Singleton Pattern
+- 30-1. 디자인 패턴 개요
+- 30-2. Singleton Pattern
+- 30-3. Factory Pattern
 
 ### [Chapter 31. 테스트 주도 개발(Test Driven Development, TDD)](chapter_31/index.md)
-- 30-1. TDD 개요
-- 30-2. Python에서의 TDD
+- 31-1. TDD 개요
+- 31-2. Python에서의 TDD

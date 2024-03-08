@@ -1,5 +1,6 @@
-# Chapter 29. Design Pattern
+# Chapter 30. Design Pattern
 
-- [29-1. 디자인 패턴 개요](29_1/contents.md)
-- [29-2. Singleton Pattern](29_2/contents.md)
+- [30-1. 디자인 패턴 개요](30_1/contents.md)
+- [30-2. Singleton Pattern](30_2/contents.md)
+- [30-3. Factory Pattern](30_3/contents.md)
  
