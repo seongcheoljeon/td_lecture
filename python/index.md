@@ -193,8 +193,10 @@
 ### [Chapter 28. Back-end](chapter_28/index.md)
 - 28-1. 백엔드(back-end)에 대하여
 - 28-2. Web Framework 소개
-- 28-3. Flask를 이용한 API 작성
-- 28-4. FastAPI를 이용한 API 작성
+- 28-3. HTTP
+- 28-4. API 엔드포인트 아키텍처 패턴
+- 28-5. Flask를 이용한 API 작성
+- 28-6. FastAPI를 이용한 API 작성
 
 ### [Chapter 29. Algorithm](chapter_29/index.md)
 - 29-1. 알고리즘 개요
