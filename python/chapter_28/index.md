@@ -6,3 +6,4 @@
 - [28-4. API 엔드포인트 아키텍처 패턴](28_4/contents.md)
 - [28-5. Flask를 이용한 API 작성](28_5/contents.md)
 - 28-6. FastAPI를 이용한 API 작성
+- [28-7. API 개발을 위한 유용한 툴](28_7/contents.md)

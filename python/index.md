@@ -111,6 +111,7 @@
 - 15-5. heap 자료구조(heapq)
 - 15-6. 자료구조 모음(collections)
 - 15-7. TUI기반의 옵션처리(Typer)
+- 15-8. Database ORM(SQLAlchemy)
 
 ### Chapter 16. 모듈과 패키지
 - 16-1. 모듈 생성
@@ -197,6 +198,7 @@
 - 28-4. API 엔드포인트 아키텍처 패턴
 - 28-5. Flask를 이용한 API 작성
 - 28-6. FastAPI를 이용한 API 작성
+- 28-7. API 개발을 위한 유용한 툴
 
 ### [Chapter 29. Algorithm](chapter_29/index.md)
 - 29-1. 알고리즘 개요
