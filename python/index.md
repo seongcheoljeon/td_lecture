@@ -110,8 +110,7 @@
 - 15-4. Json형식(JmesPath)
 - 15-5. heap 자료구조(heapq)
 - 15-6. 자료구조 모음(collections)
-- 15-7. API 서버(FastAPI)
-- 15-8. TUI기반의 옵션처리(Typer)
+- 15-7. TUI기반의 옵션처리(Typer)
 
 ### Chapter 16. 모듈과 패키지
 - 16-1. 모듈 생성
@@ -195,6 +194,7 @@
 - 28-1. 백엔드(back-end)에 대하여
 - 28-2. Web Framework 소개
 - 28-3. Flask를 이용한 API 작성
+- 28-4. FastAPI를 이용한 API 작성
 
 ### [Chapter 29. Algorithm](chapter_29/index.md)
 - 29-1. 알고리즘 개요

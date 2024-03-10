@@ -1,4 +1,4 @@
-# 15-7. API 서버(FastAPI)
+# 28-4. API 서버(FastAPI)
 
 > FastAPI는 Python으로 API를 구축할 수 있게 해주는 빠르고 효율적인 웹 프레임워크이다.
 
