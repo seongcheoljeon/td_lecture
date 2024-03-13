@@ -218,6 +218,7 @@
 - 30-1. 디자인 패턴 개요
 - 30-2. Singleton Pattern
 - 30-3. Factory Pattern
+- 30-4. Observer Pattern
 
 ### [Chapter 31. 테스트 주도 개발(Test Driven Development, TDD)](chapter_31/index.md)
 - 31-1. TDD 개요
