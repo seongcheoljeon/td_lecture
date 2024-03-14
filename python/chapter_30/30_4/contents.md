@@ -194,7 +194,7 @@ class AnyOtherSubscriber(Subscriber):
 구현한 `update()` 메서드를 내부적으로 호출한다.
 + `NewsPublisher`에는 구독자를 목록에서 제거하는 `detach()` 메서드가 있다.
 
-#### Subject와 Observer의 상호 작용 구현의 전체 코드
+#### Subject와 Observer의 상호 작용 구현 코드
 
 ```python
 news_publisher = NewsPublisher()

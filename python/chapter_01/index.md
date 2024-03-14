@@ -1,6 +1,6 @@
 # Chapter 01. 기본 설정
 
-- [01-1. Python 소개](1_1/contents.md)
+- [01-1. Python 소개](01_1/contents.md)
 - 01-2. Python 설치
 - 01-3. Editor 설치
 - 01-4. Linux 소개 및 Linux 기본 명령어
