@@ -148,3 +148,42 @@ if __name__ == '__main__':
     window.show()
     app.exec()
 ```
+
+## QTreeWidget의 예는 다음과 같다.
+
+```python
+from PySide2 import QtWidgets, QtGui, QtCore
+
+
+data = {
+    "asset1": [["smoke", "NSS"], ["fire", "NSS"], ["water", "CSS"]],
+    "asset2": [["dest", "TDD"], ["expl", "ZXX"]],
+    "asset3": [["sand", "RND"], ["bomb", "ZQQ"]],
+}
+
+
+class MainWindow(QtWidgets.QTreeWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setColumnCount(2)
+        self.setHeaderLabels(["Name", "Project"])
+
+        items = list()
+
+        for key, val in data.items():
+            item = QtWidgets.QTreeWidgetItem([key])
+            for v in val:
+                child = QtWidgets.QTreeWidgetItem([v[0], v[1]])
+                item.addChild(child)
+            items.append(item)
+
+        self.insertTopLevelItems(0, items)
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+    m = MainWindow()
+    m.show()
+    app.exec_()
+```
